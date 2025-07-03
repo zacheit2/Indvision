@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indvision - Indigenous Programs Database</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #8b1538 0%, #e4405f 25%, #f56500 50%, #fcaf45 75%, #ffdc80 100%);
+            min-height: 100vh;
+            background-attachment: fixed;
+            padding-top: 80px; /* Account for sticky banner */
+        }
+
+        /* Sticky Banner */
+        .sticky-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(90deg, #8b1538 0%, #e4405f 25%, #f56500 50%, #fcaf45 75%, #ffdc80 100%);
+            color: white;
+            padding: 15px 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .banner-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .banner-logo {
+            font-size: 28px;
+            font-weight: 400;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            letter-spacing: -0.5px;
+        }
+
+        .banner-nav {
+            display: flex;
+            gap: 20px;
+        }
+
+        .banner-nav-btn {
+            padding: 8px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .banner-nav-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .banner-nav-btn.active {
+            background: rgba(255, 255, 255, 0.4);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        nav {
+            display: none;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #8b1538, #e4405f);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(139, 21, 56, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 21, 56, 0.4);
+            background: linear-gradient(45deg, #e4405f, #f56500);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(45deg, #f56500, #fcaf45);
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #8b1538;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-align: center;
+            font-weight: 700;
+            background: linear-gradient(45deg, #8b1538, #e4405f, #f56500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(139, 21, 56, 0.1), rgba(245, 101, 0, 0.1));
+            border-radius: 15px;
+            border: 2px solid rgba(139, 21, 56, 0.2);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #8b1538;
+            font-size: 14px;
+        }
+
+        .filter-group input, .filter-group select {
+            padding: 10px 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .filter-group input:focus, .filter-group select:focus {
+            outline: none;
+            border-color: #e4405f;
+            box-shadow: 0 0 0 3px rgba(228, 64, 95, 0.1);
+        }
+
+        .results-info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(139, 21, 56, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #e4405f;
+            font-weight: 600;
+            color: #8b1538;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ddd;
+            position: relative;
+            /* Flip the container vertically to move scrollbar to top */
+            transform: rotateX(180deg);
+            /* Add padding to create space between scrollbar and table */
+            padding-bottom: 15px;
+        }
+
+        .table-container table {
+            /* Flip the table back to normal orientation */
+            transform: rotateX(180deg);
+        }
+
+        .table-container .mobile-cards {
+            /* Flip the mobile cards back to normal orientation */
+            transform: rotateX(180deg);
+        }
+
+        .table-container::-webkit-scrollbar {
+            height: 12px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: #ffdc80;
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: #f56500;
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #fcaf45;
+        }
+
+        /* Remove the top scrollbar elements since we don't need them anymore */
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            /* Removed fixed min-width */
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+            vertical-align: top;
+            /* Allow text wrapping */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        th {
+            background: linear-gradient(45deg, #8b1538, #e4405f);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            /* Allow header text to wrap */
+            white-space: normal;
+        }
+
+        /* Specific column widths to ensure visibility */
+        th:nth-child(1), td:nth-child(1) { min-width: 200px; } /* School Name */
+        th:nth-child(2), td:nth-child(2) { min-width: 80px; } /* Level */
+        th:nth-child(3), td:nth-child(3) { min-width: 180px; } /* Bridging Program */
+        th:nth-child(4), td:nth-child(4) { min-width: 150px; } /* Academic Program */
+        th:nth-child(5), td:nth-child(5) { min-width: 100px; } /* Degree */
+        th:nth-child(6), td:nth-child(6) { min-width: 150px; } /* Link */
+        th:nth-child(7), td:nth-child(7) { min-width: 150px; } /* Student Center */
+        th:nth-child(8), td:nth-child(8) { min-width: 120px; } /* Phone */
+        th:nth-child(9), td:nth-child(9) { min-width: 120px; } /* Contact Person */
+        th:nth-child(10), td:nth-child(10) { min-width: 150px; } /* Email */
+        th:nth-child(11), td:nth-child(11) { min-width: 100px; } /* Province */
+
+        tr:nth-child(even) {
+            background: rgba(139, 21, 56, 0.03);
+        }
+
+        tr:hover {
+            background: rgba(228, 64, 95, 0.1);
+            transition: background 0.3s ease;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .about-content {
+            padding: 40px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(139, 21, 56, 0.05));
+            border-radius: 15px;
+            line-height: 1.8;
+            font-size: 18px;
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(139, 21, 56, 0.1);
+        }
+
+        .link-cell {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .link-cell a {
+            color: #e4405f;
+            text-decoration: none;
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        .link-cell a:hover {
+            color: #8b1538;
+            text-decoration: underline;
+        }
+
+        .clear-filters {
+            background: #f56500;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .clear-filters:hover {
+            background: #fcaf45;
+            transform: translateY(-1px);
+        }
+
+        /* Mobile-first responsive design */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 140px; /* More space for larger banner on mobile */
+            }
+            
+            .banner-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .banner-logo {
+                font-size: 20px;
+            }
+            
+            .banner-nav {
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+            }
+            
+            .banner-nav-btn {
+                font-size: 12px;
+                padding: 8px 16px;
+            }
+            
+            .container {
+                margin: 10px;
+                padding: 15px;
+                border-radius: 15px;
+            }
+            
+            .filters {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                padding: 15px;
+            }
+            
+            .filter-group input, .filter-group select {
+                padding: 12px;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            .nav-btn {
+                font-size: 14px;
+                padding: 10px 20px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 20px;
+            }
+
+            /* Force hide table completely on mobile and show cards */
+            .table-container {
+                /* Remove the flip transform on mobile */
+                transform: none !important;
+                padding-bottom: 0;
+                overflow: visible;
+                border: none;
+                box-shadow: none;
+                border-radius: 0;
+                background: transparent;
+            }
+
+            table {
+                display: none !important; /* Force hide table on mobile */
+            }
+
+            .mobile-cards {
+                display: block !important;
+                /* Remove the flip transform on mobile */
+                transform: none !important;
+                width: 100%;
+                margin-top: 0;
+            }
+
+            .program-card {
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 10px;
+                padding: 15px;
+                margin-bottom: 15px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                width: 100%;
+            }
+
+            .program-card h3 {
+                color: #8b1538;
+                margin-bottom: 10px;
+                font-size: 1.1em;
+                font-weight: 600;
+            }
+
+            .program-card .field {
+                margin-bottom: 8px;
+                font-size: 14px;
+                line-height: 1.4;
+            }
+
+            .program-card .field-label {
+                font-weight: 600;
+                color: #e4405f;
+                display: block;
+                margin-bottom: 2px;
+            }
+
+            .program-card .field-value {
+                color: #333;
+                word-break: break-word;
+                margin-left: 0;
+            }
+
+            .program-card .field-value a {
+                color: #e4405f;
+                text-decoration: none;
+                word-break: break-all;
+            }
+
+            .program-card .field-value a:hover {
+                text-decoration: underline;
+            }
+
+            .results-info {
+                margin-bottom: 15px;
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .clear-filters {
+                width: 100%;
+                padding: 12px;
+                font-size: 16px;
+                margin-bottom: 15px;
+            }
+
+            .no-data {
+                text-align: center;
+                padding: 40px 20px;
+                color: #666;
+                font-style: italic;
+            }
+        }
+
+        /* Desktop table styles */
+        .mobile-cards {
+            display: none;
+        }
+
+        @media (min-width: 769px) {
+            .mobile-cards {
+                display: none;
+            }
+            
+            table {
+                display: table;
+            }
+            
+            /* Ensure the flip transform is applied on desktop */
+            .table-container {
+                transform: rotateX(180deg);
+                padding-bottom: 15px;
+            }
+            
+            .table-container table {
+                transform: rotateX(180deg);
+            }
+            
+            .table-container .mobile-cards {
+                transform: rotateX(180deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sticky Banner -->
+    <div class="sticky-banner">
+        <div class="banner-content">
+            <div class="banner-logo">Indvision</div>
+            <div class="banner-nav">
+                <button class="banner-nav-btn active" onclick="showPage('data'); updateBannerNav(this)">Indigenous Programs Database</button>
+                <button class="banner-nav-btn" onclick="showPage('about'); updateBannerNav(this)">About</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <nav>
+            <button class="nav-btn active" onclick="showPage('data')">Indigenous Programs Database</button>
+            <button class="nav-btn" onclick="showPage('about')">About</button>
+        </nav>
+
+        <!-- Data Page -->
+        <div id="data-page" class="page active">
+            <div class="filters">
+                <div class="filter-group">
+                    <label>School Name</label>
+                    <input type="text" id="filter-0" placeholder="Filter by school..." onkeyup="applyFilters()">
+                </div>
+                <div class="filter-group">
+                    <label>Level</label>
+                    <select id="filter-1" onchange="applyFilters()">
+                        <option value="">All Levels</option>
+                        <option value="Undergrad">Undergrad</option>
+                        <option value="Graduate">Graduate</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Degree</label>
+                    <select id="filter-4" onchange="applyFilters()">
+                        <option value="">All Degrees</option>
+                        <option value="BEng">BEng</option>
+                        <option value="BSc">BSc</option>
+                        <option value="BComm">BComm</option>
+                        <option value="BA">BA</option>
+                        <option value="BN">BN</option>
+                        <option value="Beng">Beng</option>
+                        <option value="Diploma">Diploma</option>
+                        <option value="Certificate">Certificate</option>
+                        <option value="Multiple">Multiple</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Province</label>
+                    <select id="filter-10" onchange="applyFilters()">
+                        <option value="">All Provinces</option>
+                        <option value="Quebec">Quebec</option>
+                        <option value="BC">BC</option>
+                        <option value="Alberta">Alberta</option>
+                        <option value="Sask">Saskatchewan</option>
+                        <option value="Manitoba">Manitoba</option>
+                        <option value="Ontario">Ontario</option>
+                        <option value="New Brunswick">New Brunswick</option>
+                        <option value="Nova Scotia">Nova Scotia</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="clear-filters" onclick="clearAllFilters()">Clear All Filters</button>
+            
+            <div id="resultsInfo" class="results-info"></div>
+
+            <div class="table-container">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>School Name</th>
+                            <th>Level</th>
+                            <th>Bridging Program Name</th>
+                            <th>Academic Program</th>
+                            <th>Degree</th>
+                            <th>Link</th>
+                            <th>Student Center</th>
+                            <th>Phone</th>
+                            <th>Contact Person</th>
+                            <th>Email</th>
+                            <th>Province</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+                
+                <!-- Mobile card layout -->
+                <div class="mobile-cards" id="mobileCards">
+                    <!-- Mobile cards will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- About Page -->
+        <div id="about-page" class="page">
+            <h1>About Indvision</h1>
+            <div class="about-content">
+                <p>The objective of Indvision is to increase indigenous participation in post-secondary education institutions. Knowledge and skill acquisition obtained from universities and trades are viewed as the best way to strengthen indigenous communities in the long term. The team at Indvision believes that effectively communicating the post-secondary opportunities available to Indigenous students will result in increased enrollment in post-secondary institutions which will contribute to long-term community health.</p>
+                
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const rawData = [
+            ["Concordia University","Undergrad","Kaiй:ri Nikawerб:ke\nIndigenous Bridging Program","Engineering","BEng","https://www.concordia.ca/academics/undergraduate/indigenous-bridging-beng.html","Otsenhбkta Student Centre","514-848-2424, ext. 7327","Bo Kim","Bo.kim@concordia.ca","Quebec"],
+            ["Concordia University","Undergrad","Kaiй:ri Nikawerб:ke\nIndigenous Bridging Program","Science","BSc","https://www.concordia.ca/academics/undergraduate/indigenous-bridging-bsc.html","Otsenhбkta Student Centre","514-848-2424, ext. 7327","Bo Kim","Bo.kim@concordia.ca","Quebec"],
+            ["Concordia University","Undergrad","Kaiй:ri Nikawerб:ke\nIndigenous Bridging Program","Commerce","BComm","https://www.concordia.ca/academics/undergraduate/indigenous-bridging-bcomm.html","Otsenhбkta Student Centre","514-848-2424, ext. 7327","Bo Kim","Bo.kim@concordia.ca","Quebec"],
+            ["Concordia University","Undergrad","Kaiй:ri Nikawerб:ke\nIndigenous Bridging Program","Psychology","BA","https://www.concordia.ca/academics/undergraduate/indigenous-bridging-psychology.html","Otsenhбkta Student Centre","514-848-2424, ext. 7327","Bo Kim","Bo.kim@concordia.ca","Quebec"],
+            ["Concordia University","Undergrad","Kaiй:ri Nikawerб:ke\nIndigenous Bridging Program","Journalism","BA","https://www.concordia.ca/academics/undergraduate/indigenous-bridging-journalism.html","Otsenhбkta Student Centre","514-848-2424, ext. 7327","Bo Kim","Bo.kim@concordia.ca","Quebec"],
+            ["Simon Fraser University","Undergrad","Indigenous University Preparation Pathway (IUPP)","Faculty of Arts and Social Sciences\nFaculty of Science","BA\nBSc","https://www.sfu.ca/students/admission/admission-requirements/indigenous-students/iupp/curriculum.html","Indigenous Student Center (ISC)","778-782-6929","Angela Wolfe","indigenous_students@sfu.ca\nask_isc@sfu.ca","BC"],
+            ["University of British Columbia","Undergrad","UBC-Langara Indigenous Transfer Partnership","Applied Science (Engineering)\nArts\nCommerce\nForestry\nKinesiology\nLand and Food Systems\nScience","BEng\nBA\nBSc","https://you.ubc.ca/applying-ubc/indigenous-admissions/indigenous-transfer-partnership/","Indigenous Gathering Space (Langara)\n\nThe Indigenous Center (UBC)","604.323.5484 (Langara)","Contact Indigenous Student Center at Langara or UBC directly","indigenous@langara.ca\n\nindigenous.recruitment@ubc.ca","BC"],
+            ["University of Victoria","Undergrad","Special Access - First Nations, Metis and Inuit Category","Multiple","Multiple","https://www.uvic.ca/undergraduate/info-for/indigenous-students/index.php","Indigenous Student Support Center","250-853-3729 (Shane Hartman)\n250-472-4846 (Tanisha Nuttall)","Shane Hartman\nTanisha Nuttall","hartman@uvic.ca\ntanishanuttall@uvic.ca","BC"],
+            ["British Columbia Institute of Technology","Undergrad","","School of Health Sciences","Diploma\nBachelor of Science\nCertificate\nBachelor of Science - Nursing","https://www.bcit.ca/health-sciences/indigenous-students/","Gathering Place","604 432 8474","Contact Indigenous Student Center","gathering_place@bcit.ca","BC"],
+            ["University of Alberta","Undergrad","Transition Year Program (TYP)","Faculy of Arts\nFaculty of Agriculture, Life and Environmental Sciecnes\nSchool of Business\nEducation - Elementary\nEducation - Secondary\nFaculty of Engineering\nKinesiology\nFaculty of Native Studies\nFaculty of Nursing\nFaculty of Science","Multiple","https://www.ualberta.ca/en/current-students/first-peoples-house/transition-year-program/index.html","First Peoples House","780-492-5677","Contact Indigenous Student Center","fph@ualberta.ca","Alberta"],
+            ["University of Calgary","Undergrad","Indigenous Admission Process (IAP)\n\nIndigenous Admission Supplmentary Process (IASP)\n\nBridging Programs (Arts, Architecture, Kinesiology, Science, Engineering, Commerce)\n\nIndigenous Student Access Program (ISAP)","Multiple","Multiple","https://www.ucalgary.ca/future-students/undergraduate/admissions/how-to-apply/indigenous-admissions#:~:text=Bridging%20programs%20offer%20foundation%20courses,be%20used%20toward%20your%20degree.","Contact indigenous recruiter via email or telephone","403.220.6912","Contact Indigenous recruiter via email or telephone","indigenous.recruiter@ucalgary.ca","Alberta"],
+            ["University of Lethbridge","Undergrad","Indigenous Student Success Certificate (ISSC)","Multiple","Multiple","https://www.ulethbridge.ca/artsci/indigenous-student-success-cohort","Iikaisskini Indigenous Services","403-329-2635","","iikaisskini@uleth.ca","Alberta"],
+            ["University of Saskatchewan","Undergrad","Direct Entry to Engineering\nISAP-STEM\nISAP-STEM Accelerator Certificate","Engineering","BEng","https://admissions.usask.ca/engineering-access-program.php","Gordon Oakes Red Bear Student Center","306 966 5790","Anita Ramkalawan","gordonoakes.redbear@usask.ca (student center)\n\nanita.ramkalawan@usask.ca (Academic Advisor)","Sask"],
+            ["University of Manitoba","Undergrad","Engineering Access Program","Engineering","BEng","https://umanitoba.ca/engineering/engineering-access-program","Indigenous Student Center","204-474-8850","","isc@umanitoba.ca","Manitoba"],
+            ["University of Manitoba","Undergrad","Mahkwa omushki kiim: Pathway to Indigenous Nursing Education (PINE)","Nursing","BN","https://umanitoba.ca/nursing/programs-of-study/mahkwa-omushki-kiim-pathway-indigenous-nursing-education-pine","Indigenous Student Center","204-474-8851","","isc@umanitoba.ca","Manitoba"],
+            ["University of Toronto","Undergrad","Millie Rotman Shime Academic Bridging Program","Faculty of Arts & Sciences","BA (Honours)\nBSc (Honours)","https://wdw.utoronto.ca/academic-bridging\n\nGeneral info: https://studentlife.utoronto.ca/service/recruitment-admissions-advising/","First Nations House","416 978 0629 (Aaron Sinclair)","Aaron Sinclair","academic.bridging@utoronto.ca \n\nindigenous.undergrad@utoronto.ca\n\n\naaron.sinclair@utoronto.ca","Ontario"],
+            ["University of Toronto","Undergrad","Transition Year Program (TYP)","Multiple","Multiple","https://typ.utoronto.ca/about-typ\n\nGeneral info: https://studentlife.utoronto.ca/service/recruitment-admissions-advising/","First Nations House","417 978 0629 (Aaron Sinclair)","Aaron Sinclair","typ.info@utoronto.ca\n\nindigenous.undergrad@utoronto.ca\n\naaron.sinclair@utoronto.ca","Ontario"],
+            ["University of Toronto","Undergrad","Diploma to Degree Program","Faculty of Arts & Sciences","Multiple","https://wdw.utoronto.ca/diploma-to-degree\n\nGeneral info: https://studentlife.utoronto.ca/service/recruitment-admissions-advising/","First Nations House","418 978 0629 (Aaron Sinclair)","Aaron Sinclair","indigenous.undergrad@utoronto.ca\n\naaron.sinclair@utoronto.ca","Ontario"],
+            ["University of Toronto","Undergrad","UTM Bridging Pathway","Multiple","Multiple","https://www.utm.utoronto.ca/future-students/bridging\n\nGeneral info: https://studentlife.utoronto.ca/service/recruitment-admissions-advising/","First Nations House","419 978 0629 (Aaron Sinclair)","Aaron Sinclair","indigenous.undergrad@utoronto.ca\n\naaron.sinclair@utoronto.ca","Ontario"],
+            ["McMaster University","Undergrad","Facilitated Indigenous Admissions Program (FIAP)","Health Sciences","","https://ihll.healthsci.mcmaster.ca/students/future-students/facilitated-admissions-self-identification/","Indigenous Health Learning Lodge","(905) 525-9140 ext. 20451","","ihll@mcmaster.ca","Ontario"],
+            ["Toronto Metropolitan University","Undergrad","Spanning the Gaps - Indigenous Foundations Program","Multiple","Multiple","https://continuing.torontomu.ca/contentManagement.do?method=load&code=CM000081","Gdoo-maawnjidimi Mompii Indigenous Student Services","416-979-5000, ext. 557699","Sheila Saikkonen","ssaikkon@torontomu.ca ","Ontario"],
+            ["Western University","Undergrad","The Indigenous Student STEM Access Program (ISSAP)","Engineering\nScience","Beng\nBSc","https://indigenous.uwo.ca/students//future-students/indigenous_student_stem_access_program.html","Indigenous Student Center","519-661-4095","","isc.staff@uwo.ca\nindigenous.admissions@uwo.ca","Ontario"],
+            ["Queen's University","Undergrad","Indigenous Student's Admissions Pathway","Multiple","Multiple","https://www.queensu.ca/admission/access/indigenous-students","Four Directions Indigenous Student Center","613-533-6970","","4direct@queensu.ca\nfd.recruiter@queensu.ca","Ontario"],
+            ["Carleton University","Undergrad","Indigenous Enriched Support Program (IESP)","Multiple","Multiple","https://carleton.ca/indigenous/cisce/iesp/","Ojigkwanong Indigenous Student Centre","613-520-6516","","indigenous@carleton.ca","Ontario"],
+            ["McGill University","Undergrad","Indigenous Admissions Protocol","Multiple","Multiple","https://www.mcgill.ca/undergraduate-admissions/apply/indigenous-applicants","First Peoples House","514-398-3217","","indigenousoutreach@mcgill.ca","Quebec"],
+            ["Laval University","Undergrad","Reserved Seats for First Nations and Inuit Applicants","Multiple","Multiple","https://www.ulaval.ca/en/ulaval-experience/first-nations-and-inuit-applicants#:~:text=The%20quota%20for%20Qu%C3%A9bec%20First,applicants%20is%20a%20provincial%20quota.&text=One%20seat%20is%20reserved%20for%20an%20applicant%20who%20holds%20a,R%20score%20higher%20than%2027.","","","","","Quebec"],
+            ["University of New Brunswick","Undergrad","Wocopsqoltine Weci Spiqiyahtuweq","Multiple","Multiple","https://www.unb.ca/mwc/programs/wwsprogram.html","Mi'kmaq-Wolastoqey Centre","506-453-4840","","mwc@unb.ca","New Brunswick"],
+            ["University of New Brunswick","Undergrad","Nutsihpiluwewicik admissions pathway","Nursing","BN","https://www.unb.ca/nutsihpiluwewicik/pathways/nutsihpiluwewicik.html","Mi'kmaq-Wolastoqey Centre","506-453-4840","","mwc@unb.ca","New Brunswick"],
+            ["University of Dalhousie","Undergrad","Indigenous Pathways Program","Engineering","Beng","https://www.dal.ca/faculty/engineering/Diversity-Engineering/indigenous-pathways-program.html","Indigenous Student Centre","902-494-8863 (Indigenous Student Center)","Daisy Peter-Paul","daisy.peter-paul@dal.ca\nindigenous.centre@dal.ca","Nova Scotia"],
+            ["University of Dalhousie","Undergrad","Indigenous Student Access Pathway","Agriculture","","https://www.dal.ca/faculty/agriculture/extended-learning/Courses/ISAP.html","Indigenous Student Centre","902-494-8864 (Indigenous Student Centre)\n902-956-9270 (Keah)","Keah Gloade","keah.gloade@dal.ca\nindigenous.centre@dal.ca\n","Nova Scotia"],
+            ["University of Dalhousie","Undergrad","Indigenous Student Access Pathway","Multiple","Multiple","https://www.dal.ca/campus_life/ssc/communities/indigenous-student-support/indigenous-student-access-pathway.html","Indigenous Student Centre","902-494-8863","","indigenous.centre@dal.ca","Nova Scotia"]
+        ];
+
+        let currentData = [...rawData];
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            document.getElementById(pageId + '-page').classList.add('active');
+        }
+
+        function updateBannerNav(activeBtn) {
+            document.querySelectorAll('.banner-nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            activeBtn.classList.add('active');
+        }
+
+        function displayTable() {
+            const tbody = document.getElementById('tableBody');
+            const mobileCards = document.getElementById('mobileCards');
+            const resultsInfo = document.getElementById('resultsInfo');
+            
+            resultsInfo.textContent = `Showing ${currentData.length} of ${rawData.length} programs`;
+            
+            if (currentData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" class="no-data">No programs match your filters</td></tr>';
+                mobileCards.innerHTML = '<div class="no-data">No programs match your filters</div>';
+            } else {
+                // Desktop table
+                tbody.innerHTML = currentData.map(row => 
+                    `<tr>
+                        ${row.map((cell, index) => {
+                            if (index === 5 && cell && cell.startsWith('http')) {
+                                return `<td class="link-cell"><a href="${cell}" target="_blank">${cell}</a></td>`;
+                            }
+                            return `<td>${cell || ''}</td>`;
+                        }).join('')}
+                    </tr>`
+                ).join('');
+                
+                // Mobile cards
+                const columnNames = ['School Name', 'Level', 'Bridging Program Name', 'Academic Program', 'Degree', 'Link', 'Student Center', 'Phone', 'Contact Person', 'Email', 'Province'];
+                
+                mobileCards.innerHTML = currentData.map(row => {
+                    const schoolName = row[0] || 'Unknown School';
+                    const level = row[1] || '';
+                    
+                    let cardContent = `<div class="program-card">
+                        <h3>${schoolName}${level ? ` - ${level}` : ''}</h3>`;
+                    
+                    // Add each field manually to ensure they display
+                    row.forEach((cell, index) => {
+                        if (index === 0) return; // Skip school name as it's in the header
+                        if (!cell || cell.trim() === '') return;
+                        
+                        const label = columnNames[index];
+                        let value = cell;
+                        
+                        // Handle links
+                        if (index === 5 && cell.startsWith('http')) {
+                            value = `<a href="${cell}" target="_blank">${cell}</a>`;
+                        }
+                        
+                        cardContent += `
+                            <div class="field">
+                                <span class="field-label">${label}:</span>
+                                <span class="field-value">${value}</span>
+                            </div>`;
+                    });
+                    
+                    cardContent += `</div>`;
+                    return cardContent;
+                }).join('');
+            }
+        }
+
+        function applyFilters() {
+            currentData = rawData.filter(row => {
+                return Array.from({length: 11}, (_, i) => i).every(colIndex => {
+                    const filter = document.getElementById(`filter-${colIndex}`);
+                    if (!filter || !filter.value) return true;
+                    
+                    const cellValue = (row[colIndex] || '').toString().toLowerCase();
+                    const filterValue = filter.value.toLowerCase();
+                    
+                    // Special handling for Academic Program (index 3) and Degree (index 4)
+                    // If the cell contains "multiple", always include it regardless of filter
+                    if ((colIndex === 3 || colIndex === 4) && cellValue.includes('multiple')) {
+                        return true;
+                    }
+                    
+                    return cellValue.includes(filterValue);
+                });
+            });
+            
+            displayTable();
+        }
+
+        function clearAllFilters() {
+            Array.from({length: 11}, (_, i) => i).forEach(i => {
+                const filter = document.getElementById(`filter-${i}`);
+                if (filter) filter.value = '';
+            });
+            currentData = [...rawData];
+            displayTable();
+        }
+
+        // Initialize table
+        displayTable();
+        
+        // No need for complex scrollbar synchronization anymore!
+    </script>
+</body>
+</html>
